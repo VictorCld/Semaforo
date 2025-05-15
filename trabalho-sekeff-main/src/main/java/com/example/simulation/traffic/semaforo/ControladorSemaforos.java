@@ -20,7 +20,10 @@ public class ControladorSemaforos implements Serializable {
     public void atualizarSemaforos() {
         Node<Intersecao> atual = grafo.vertices.head;
         while (atual != null) {
-            atual.data.gs.click(); // Atualiza os tempos e estados dos semáforos
+            Semaforo semaforo = atual.data.getSemaforo();
+            if (semaforo != null) {
+                semaforo.attSemaforo();
+            }
             atual = atual.next;
         }
     }

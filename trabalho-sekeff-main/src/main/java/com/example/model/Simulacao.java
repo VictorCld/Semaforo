@@ -8,7 +8,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.LinkedList;
+import java.util.Scanner;
 
+import com.example.CidadeJson.ImportadorDeGrafo;
 import com.example.simulation.datastructure.Fila;
 import com.example.simulation.graph.Grafo;
 import com.example.simulation.graph.Intersecao;
@@ -62,74 +64,144 @@ public class Simulacao implements Serializable {
         }
     }
 
+    // Adicione este método na classe para mostrar os semáforos:
     private void mostrarEstadoSemaforos() {
+        System.out.println("Estado dos semáforos:");
         for (Semaforo s : controladorSemaforos.getSemaforos()) {
-            System.out.println(s);
+            if (s.getIntersecao() != null) {
+                System.out.println("Semáforo na interseção " + s.getIntersecao().getId() + ": " + s.getEstadoAtual());
+            } else {
+                System.out.println("Semáforo: " + s.getEstadoAtual());
+            }
         }
     }
 
     public void testarVeiculosESemaforos(int quantidadeDeVeiculos) {
-        System.out.println("=== INÍCIO DO TESTE DE VEÍCULOS E SEMÁFOROS ===");
+        System.out.println("===============================================");
+        System.out.println(" INÍCIO DA SIMULAÇÃO DE VEÍCULOS E SEMÁFOROS ");
+        System.out.println("===============================================");
 
         GeradorDeSemaforos geradorDeSemaforos = new GeradorDeSemaforos();
         geradorDeSemaforos.configurarSemaforos(grafo);
 
         geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
-        // Supondo que Fila<Veiculo> tenha um método size() e get(int)
-        for (int i = 0; i < filaVeiculos.size(); i++) {
+
+        // Exibe os veículos criados corretamente, numerados a partir de 1
+        for (int i = 0; i < quantidadeDeVeiculos; i++) {
             Veiculo v = filaVeiculos.get(i);
-            System.out.println("Rota veículo " + v.getId() + ": " + v.getCaminho());
+            System.out.println("Veículo " + v.getNumeroSimulacao() + " criado com rota de " + v.getOrigem() + " até "
+                    + v.getDestino());
         }
 
-        for (int ciclo = 0; ciclo < 20; ciclo++) {
-            System.out.println("=== CICLO " + ciclo + " ===");
+        com.example.simulation.datastructure.HashSet<Long> veiculosQueChegaram = new com.example.simulation.datastructure.HashSet<>();
+        int ciclo = 0;
+        while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos) {
+            System.out.println("\n========== CICLO " + ciclo + " ==========");
 
             int tamanho = filaVeiculos.size();
             for (int i = 0; i < tamanho; i++) {
                 Veiculo v = filaVeiculos.desenfileirar();
+                int numeroVeiculo = v.getNumeroSimulacao();
 
                 if (v.chegouAoDestino()) {
-                    System.out.println("Veículo " + v.getId() + " chegou ao destino.");
+                    if (!veiculosQueChegaram.contem(v.getId())) {
+                        veiculosQueChegaram.adicionar(v.getId());
+                        System.out.println(" Veículo " + numeroVeiculo + " chegou ao destino final: " + v.getDestino());
+                    }
                     continue;
                 }
 
                 Intersecao proxima = v.getProximaIntersecao(grafo);
+                Intersecao atual = v.getIntersecaoAtual(grafo);
+
                 if (proxima == null) {
-                    if (v.chegouAoDestino()) {
-                        System.out.println("Veículo " + v.getId() + " chegou ao destino (sem próxima interseção).");
+                    if (v.estaNoDestino() && !veiculosQueChegaram.contem(v.getId())) {
+                        v.marcarChegou();
+                        veiculosQueChegaram.adicionar(v.getId());
+                        System.out.println(" Veículo " + numeroVeiculo + " chegou ao destino final: " + v.getDestino());
                     } else {
-                        System.out.println("Veículo " + v.getId()
-                                + " sem próxima interseção, mas ainda não chegou ao destino.");
                         filaVeiculos.enfileirar(v);
                     }
                     continue;
                 }
 
                 Semaforo semaforo = proxima.getSemaforo();
-                TrafficLightState estado = (semaforo != null) ? semaforo.getEstadoAtual() : TrafficLightState.VERDE;
-
-                System.out
-                        .println("Veículo " + v.getId() + " -> Próxima: " + proxima.getId() + " | Semáforo: " + estado);
-
-                if (estado == TrafficLightState.VERDE) {
+                if (semaforo == null) {
                     v.avancar();
-                    System.out.println("Veículo " + v.getId() + " avançou para " + v.getIntersecaoAtual(grafo).getId());
+                    System.out.println(" Veículo " + numeroVeiculo + " avançou de " + atual.getId() + " para -> "
+                            + proxima.getId() + " (sem semáforo).");
                 } else {
-                    System.out.println("Veículo " + v.getId() + " aguardando sinal verde.");
+                    TrafficLightState estado = semaforo.getEstadoAtual();
+                    switch (estado) {
+                        case VERDE:
+                            v.avancar();
+                            System.out.println(" Veículo " + numeroVeiculo + " passou no sinal VERDE: " + atual.getId()
+                                    + " -> " + proxima.getId());
+                            break;
+                        case AMARELO:
+                            System.out.println(" Veículo " + numeroVeiculo + " aguardando no sinal AMARELO em "
+                                    + atual.getId() + " (destino: " + proxima.getId() + ")");
+                            break;
+                        case VERMELHO:
+                            System.out.println(" Veículo " + numeroVeiculo + " aguardando no sinal VERMELHO em "
+                                    + atual.getId() + " (destino: " + proxima.getId() + ")");
+                            break;
+                    }
                 }
 
                 if (!v.chegouAoDestino()) {
                     filaVeiculos.enfileirar(v);
-                } else {
-                    System.out.println("Veículo " + v.getId() + " chegou ao destino.");
+                } else if (!veiculosQueChegaram.contem(v.getId())) {
+                    veiculosQueChegaram.adicionar(v.getId());
+                    System.out.println(" Veículo " + numeroVeiculo + " chegou ao destino final: " + v.getDestino());
                 }
             }
 
             controladorSemaforos.atualizarSemaforos();
-            System.out.println();
+            ciclo++;
         }
 
-        System.out.println("=== FIM DO TESTE ===");
+        System.out.println("\n===============================================");
+        System.out.println("    TODOS OS VEÍCULOS CHEGARAM AO DESTINO!     ");
+        System.out.println("===============================================");
+    }
+
+    public static void executarSimulacaoTerminal() {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("===============================================");
+        System.out.println("      SIMULADOR DE TRÂNSITO - SEKEFF");
+        System.out.println("===============================================");
+        System.out.print("Digite a quantidade de veículos para simular: ");
+        int quantidadeVeiculos = 0;
+        while (quantidadeVeiculos <= 0) {
+            try {
+                quantidadeVeiculos = Integer.parseInt(scanner.nextLine());
+                if (quantidadeVeiculos <= 0) {
+                    System.out.print("Por favor, digite um número positivo: ");
+                }
+            } catch (NumberFormatException e) {
+                System.out.print("Entrada inválida. Digite um número inteiro: ");
+            }
+        }
+
+        Grafo grafo = null;
+        try {
+            grafo = ImportadorDeGrafo.importarDeArquivoUnico(
+                    "C:\\Users\\victo\\Downloads\\trabalho-sekeff-main\\trabalho-sekeff-main\\src\\main\\java\\com\\example\\CidadeJson\\CentroTeresinaPiauíBrazil.json");
+        } catch (Exception e) {
+            System.out.println("Erro ao importar o grafo: " + e.getMessage());
+            return;
+        }
+
+        Simulacao sim = new Simulacao(grafo, new GeradorVeiculos(grafo));
+        System.out.println("\nIniciando simulação com " + quantidadeVeiculos + " veículos...\n");
+        sim.testarVeiculosESemaforos(quantidadeVeiculos);
+
+        System.out.println("\n===============================================");
+        System.out.println("      FIM DA SIMULAÇÃO");
+        System.out.println("===============================================");
+        scanner.close();
     }
 
     private void simularMovimentoVeiculos() {

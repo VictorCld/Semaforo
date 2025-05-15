@@ -14,7 +14,7 @@ import com.example.simulation.graph.Rua;
 public class Dijkstra implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public static LinkedList<Integer> encontrarMenorCaminho(Grafo grafo, Intersecao origem, Intersecao destino) {
+    public static LinkedList<Long> encontrarMenorCaminho(Grafo grafo, Intersecao origem, Intersecao destino) {
         HashMap<Intersecao, Integer> distancias = new HashMap<>();
         HashMap<Intersecao, Intersecao> anteriores = new HashMap<>();
         HashSet<Intersecao> visitados = new HashSet<>();
@@ -34,7 +34,7 @@ public class Dijkstra implements Serializable {
             if (atual.equals(destino))
                 break; // Para cedo se chegou no destino
 
-            visitados.adicionar(atual); // Corrigido para adicionar o vértice atual
+            visitados.adicionar(atual);
 
             LinkedList<Rua> adjacentes = grafo.obterArestasDe(atual);
             for (int i = 0; i < adjacentes.tamanho(); i++) {
@@ -51,10 +51,10 @@ public class Dijkstra implements Serializable {
         }
 
         Fila<Intersecao> caminhoFila = construirCaminho(anteriores, origem, destino);
-        LinkedList<Integer> caminhoIds = new LinkedList<>();
+        LinkedList<Long> caminhoIds = new LinkedList<>();
         while (!caminhoFila.isEmpty()) {
             Intersecao intersecao = caminhoFila.desenfileirar();
-            caminhoIds.add((int) intersecao.id);
+            caminhoIds.add(intersecao.id); // Use long, não faça cast para int!
         }
         return caminhoIds;
     }
@@ -73,27 +73,27 @@ public class Dijkstra implements Serializable {
     }
 
     private static Fila<Intersecao> construirCaminho(HashMap<Intersecao, Intersecao> anteriores, Intersecao origem,
-        Intersecao destino) {
-    PilhaEncadeada<Intersecao> pilha = new PilhaEncadeada<>();
-    Intersecao atual = destino;
+            Intersecao destino) {
+        PilhaEncadeada<Intersecao> pilha = new PilhaEncadeada<>();
+        Intersecao atual = destino;
 
-    // Monta a pilha de destino até origem (ou null)
-    while (atual != null) {
-        pilha.empilhar(atual);
-        atual = anteriores.get(atual);
+        // Monta a pilha de destino até origem (ou null)
+        while (atual != null) {
+            pilha.empilhar(atual);
+            atual = anteriores.get(atual);
+        }
+
+        // Verifica se o caminho encontrado começa na origem
+        if (pilha.estaVazia() || !pilha.getTopo().equals(origem)) {
+            // Não encontrou caminho válido
+            return new Fila<>();
+        }
+
+        Fila<Intersecao> caminho = new Fila<>();
+        while (!pilha.estaVazia()) {
+            caminho.enfileirar(pilha.desempilhar());
+        }
+
+        return caminho;
     }
-
-    // Verifica se o caminho encontrado começa na origem
-    if (pilha.estaVazia() || !pilha.getTopo().equals(origem)) {
-        // Não encontrou caminho válido
-        return new Fila<>();
-    }
-
-    Fila<Intersecao> caminho = new Fila<>();
-    while (!pilha.estaVazia()) {
-        caminho.enfileirar(pilha.desempilhar());
-    }
-
-    return caminho;
-}
 }

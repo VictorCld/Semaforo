@@ -27,12 +27,6 @@ public class GrupoSemaforo implements Serializable {
         this.tempoVermelho = tempoVermelho;
         this.quantidade = quantidade;
         this.semaforos = new LinkedList<>();
-
-        // Cria os semáforos e adiciona na lista
-        for (int i = 0; i < quantidade; i++) {
-            Semaforo s = new Semaforo(tempoVerde, tempoAmarelo, tempoVermelho);
-            semaforos.add(s);
-        }
     }
 
     public void click() {
@@ -44,23 +38,30 @@ public class GrupoSemaforo implements Serializable {
     }
 
     public void adicionarSemaforos(Grafo grafo, int tempoVerde, int tempoAmarelo, int tempoVermelho) {
-        Node<Intersecao> atual = grafo.vertices.head;
+    Node<Intersecao> atual = grafo.vertices.head;
 
-        while (atual != null) {
-            Intersecao intersecao = atual.data;
+    while (atual != null) {
+        Intersecao intersecao = atual.data;
 
-            // Só adiciona se ainda não tiver grupo de semáforo
-            if (intersecao.gs == null || intersecao.gs.semaforos.isEmpty()) {
-                long entradas = contarEntradas(intersecao.id, grafo);
+        // Só adiciona se ainda não tiver grupo de semáforo
+        if (intersecao.gs == null || intersecao.gs.semaforos.isEmpty()) {
+            long entradas = contarEntradas(intersecao.id, grafo);
 
-                if (entradas > 2) {
-                    intersecao.gs = new GrupoSemaforo(tempoVerde, tempoAmarelo, tempoVermelho, (int) entradas);
+            if (entradas > 2) {
+                GrupoSemaforo grupo = new GrupoSemaforo();
+                grupo.semaforos = new LinkedList<>();
+                for (int i = 0; i < entradas; i++) {
+                    // Agora cada semáforo recebe a interseção correta!
+                    Semaforo s = new Semaforo(intersecao, tempoVerde, tempoAmarelo, tempoVermelho);
+                    grupo.semaforos.add(s);
                 }
+                intersecao.gs = grupo;
             }
-
-            atual = atual.next;
         }
+
+        atual = atual.next;
     }
+}
 
     private static long contarEntradas(long idIntersecao, Grafo grafo) {
         int entradas = 0;

@@ -91,12 +91,14 @@ public class Grafo implements Serializable {
     }
 
     public Intersecao obterIntersecaoPorId(long id) {
-        for (Intersecao intersecao : vertices) {
-            if (intersecao.getId() == id) {
-                return intersecao;
+        Node<Intersecao> atual = vertices.head;
+        while (atual != null) {
+            if (atual.data.getId() == id) {
+                return atual.data;
             }
+            atual = atual.next;
         }
-        return null; // Return null if no intersection with the given ID is found
+        return null;
     }
 
     public void printGraph() {
