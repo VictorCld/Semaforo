@@ -1,8 +1,12 @@
 package com.example.model;
 
-import com.example.simulation.traffic.TrafficLightState;
+import java.io.Serializable;
 
-public class Semaforo {
+import com.example.simulation.traffic.semaforo.TrafficLightState;
+
+public class Semaforo implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private TrafficLightState estadoAtual;
     private int tempoVerde;
     private int tempoAmarelo;
@@ -56,6 +60,10 @@ public class Semaforo {
     @Override
     public String toString() {
         return "Semáforo está " + estadoAtual;
+    }
+
+    public boolean podeAvancar(){
+        return true;
     }
 
 }

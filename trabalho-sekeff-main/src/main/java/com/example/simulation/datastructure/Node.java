@@ -1,6 +1,9 @@
 package com.example.simulation.datastructure;
 
-public class Node<T> {
+import java.io.Serializable;
+
+public class Node<T> implements Serializable {
+    private static final long serialVersionUID = 1L;
     public  T data;
     public Node<T> next;
 

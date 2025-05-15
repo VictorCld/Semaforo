@@ -1,9 +1,14 @@
 package com.example.simulation.datastructure;
 
 import com.example.simulation.graph.Rua;
+
+import java.util.Iterator;
+import java.io.Serializable;
+
 import com.example.simulation.graph.Intersecao;
 
-public class LinkedList<T> {
+public class LinkedList<T> implements Iterable<T>, Serializable {
+  private static final long serialVersionUID = 1L;
   public Node<T> head;
 
   public void add(T data) {
@@ -19,17 +24,22 @@ public class LinkedList<T> {
     }
   }
 
-  public void remove(long destino){
-    if(head == null) return;
+  public boolean isEmpty() {
+    return head == null;
+  }
 
-    if(((Rua) head.data).destino == destino){
+  public void remove(long destino) {
+    if (head == null)
+      return;
+
+    if (((Rua) head.data).destino == destino) {
       head = head.next;
       return;
     }
 
     Node<T> actual = head;
-    while(actual.next != null){
-      if(((Rua) actual.next.data).destino == destino){
+    while (actual.next != null) {
+      if (((Rua) actual.next.data).destino == destino) {
         actual.next = actual.next.next;
         return;
       }
@@ -37,17 +47,18 @@ public class LinkedList<T> {
     }
   }
 
-  public void removerVertice(long id){
-    if(head == null) return;
+  public void removerVertice(long id) {
+    if (head == null)
+      return;
 
-    if(((Intersecao) head.data).id == id){
+    if (((Intersecao) head.data).id == id) {
       head = head.next;
       return;
     }
 
     Node<T> actual = head;
-    while(actual.next != null){
-      if(((Intersecao) actual.next.data).id == id){
+    while (actual.next != null) {
+      if (((Intersecao) actual.next.data).id == id) {
         actual.next = actual.next.next;
         return;
       }
@@ -76,12 +87,12 @@ public class LinkedList<T> {
     return false;
   }
 
-  //ORIGEM DO CAMINHO
+  // ORIGEM DO CAMINHO
   public T getPrimeiro() {
     return head != null ? head.data : null;
   }
 
-  //CAMINHO QUE O VEICULO VAI
+  // CAMINHO QUE O VEICULO VAI
   public T getProximo(T valorAtual) {
     Node<T> atual = head;
     while (atual != null && atual.next != null) {
@@ -90,7 +101,17 @@ public class LinkedList<T> {
       }
       atual = atual.next;
     }
-    return null; 
+    return null;
+  }
+
+  public T getUltimo() {
+    if (head == null)
+      return null;
+    Node<T> atual = head;
+    while (atual.next != null) {
+      atual = atual.next;
+    }
+    return atual.data;
   }
 
   public void print() {
@@ -100,5 +121,89 @@ public class LinkedList<T> {
       actual = actual.next;
     }
     System.out.println("null");
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    Node<T> current = head;
+
+    while (current != null) {
+      sb.append(current.data); // ou current.value dependendo do seu nome
+      if (current.next != null) {
+        sb.append(" -> ");
+      }
+      current = current.next;
+    }
+
+    return sb.toString();
+  }
+
+  public T get(int index) {
+    if (index < 0 || index >= getSize()) {
+      throw new IndexOutOfBoundsException("Index: " + index);
+    }
+    Node<T> current = head;
+    int count = 0;
+    while (count < index) {
+      current = current.next;
+      count++;
+    }
+    return current.data;
+  }
+
+  public int getSize() {
+    int tamanho = 0;
+    Node<T> atual = head;
+    while (atual != null) {
+      tamanho++;
+      atual = atual.next;
+    }
+    return tamanho;
+  }
+
+  @Override
+  public Iterator<T> iterator() {
+    return new Iterator<T>() {
+      private Node<T> atual = head;
+
+      @Override
+      public boolean hasNext() {
+        return atual != null;
+      }
+
+      @Override
+      public T next() {
+        if (atual == null) {
+          throw new java.util.NoSuchElementException();
+        }
+        T data = atual.data;
+        atual = atual.next;
+        return data;
+      }
+    };
+  }
+
+  public int tamanho() {
+    int tamanho = 0;
+    Node<T> atual = head;
+    while (atual != null) {
+      tamanho++;
+      atual = atual.next;
+    }
+    return tamanho;
+  }
+
+  public T obter(int index) {
+    Node<T> atual = head;
+    int contador = 0;
+    while (atual != null) {
+      if (contador == index) {
+        return atual.data;
+      }
+      atual = atual.next;
+      contador++;
+    }
+    throw new IndexOutOfBoundsException("Índice fora do limite: " + index);
   }
 }
