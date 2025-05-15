@@ -1,7 +1,7 @@
 package com.example.simulation.traffic.semaforo;
 
 import java.io.Serializable;
-import java.util.List;
+
 
 import com.example.model.Semaforo;
 import com.example.simulation.datastructure.LinkedList;
@@ -36,18 +36,16 @@ public class ControladorSemaforos implements Serializable {
         }
     }
 
-    public List<Semaforo> getSemaforos() {
+    public LinkedList<Semaforo> getSemaforos() {
         LinkedList<Semaforo> semaforos = new LinkedList<>();
-        for (Intersecao intersecao : grafo.vertices) {
-            if (intersecao.getSemaforo() != null) {
-                semaforos.add(intersecao.getSemaforo());
+        Node<Intersecao> atual = grafo.vertices.head;
+        while (atual != null) {
+            Semaforo semaforo = atual.data.getSemaforo();
+            if (semaforo != null) {
+                semaforos.add(semaforo);
             }
+            atual = atual.next;
         }
-        // Convert custom LinkedList to java.util.List (ArrayList)
-        java.util.List<Semaforo> result = new java.util.ArrayList<>();
-        for (Semaforo s : semaforos) {
-            result.add(s);
-        }
-        return result;
+        return semaforos;
     }
 }

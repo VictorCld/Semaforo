@@ -13,6 +13,7 @@ public class GrupoSemaforo implements Serializable {
     private static final long serialVersionUID = 1L;
     public LinkedList<Semaforo> semaforos = new LinkedList<Semaforo>();
     long id;
+    //descobrir erro
     private int tempoVerde;
     private int tempoAmarelo;
     private int tempoVermelho;

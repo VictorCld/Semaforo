@@ -7,11 +7,11 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.LinkedList;
 import java.util.Scanner;
 
 import com.example.CidadeJson.ImportadorDeGrafo;
 import com.example.simulation.datastructure.Fila;
+import com.example.simulation.datastructure.LinkedList;
 import com.example.simulation.graph.Grafo;
 import com.example.simulation.graph.Intersecao;
 import com.example.simulation.traffic.semaforo.ControladorSemaforos;
@@ -35,6 +35,7 @@ public class Simulacao implements Serializable {
         this.controladorSemaforos = new ControladorSemaforos(grafo);
     }
 
+    //pensar se vou usar
     private LinkedList<Semaforo> coletarSemaforos() {
         LinkedList<Semaforo> semaforos = new LinkedList<>();
         for (Intersecao intersecao : grafo.vertices) {
@@ -57,14 +58,14 @@ public class Simulacao implements Serializable {
             simularMovimentoVeiculos();
 
             try {
-                Thread.sleep(1000); // 1 segundo = 1 minuto simulado
+                Thread.sleep(1000); 
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
 
-    // Adicione este método na classe para mostrar os semáforos:
+    
     private void mostrarEstadoSemaforos() {
         System.out.println("Estado dos semáforos:");
         for (Semaforo s : controladorSemaforos.getSemaforos()) {
@@ -85,13 +86,6 @@ public class Simulacao implements Serializable {
         geradorDeSemaforos.configurarSemaforos(grafo);
 
         geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
-
-        // Exibe os veículos criados corretamente, numerados a partir de 1
-        for (int i = 0; i < quantidadeDeVeiculos; i++) {
-            Veiculo v = filaVeiculos.get(i);
-            System.out.println("Veículo " + v.getNumeroSimulacao() + " criado com rota de " + v.getOrigem() + " até "
-                    + v.getDestino());
-        }
 
         com.example.simulation.datastructure.HashSet<Long> veiculosQueChegaram = new com.example.simulation.datastructure.HashSet<>();
         int ciclo = 0;
@@ -191,6 +185,7 @@ public class Simulacao implements Serializable {
                     "C:\\Users\\victo\\Downloads\\trabalho-sekeff-main\\trabalho-sekeff-main\\src\\main\\java\\com\\example\\CidadeJson\\CentroTeresinaPiauíBrazil.json");
         } catch (Exception e) {
             System.out.println("Erro ao importar o grafo: " + e.getMessage());
+            scanner.close();
             return;
         }
 
@@ -215,7 +210,7 @@ public class Simulacao implements Serializable {
 
             if (v.chegouAoDestino()) {
                 System.out.println("Veículo " + v.getId() + " chegou ao destino.");
-                // Não reenfileirar, pois chegou ao destino
+                
                 continue;
             }
 
@@ -224,11 +219,11 @@ public class Simulacao implements Serializable {
             if (proxima == null) {
                 if (v.chegouAoDestino()) {
                     System.out.println("Veículo " + v.getId() + " chegou ao destino.");
-                    // Não reenfileira, pois já chegou
+                    
                 } else {
                     System.out.println("Veículo " + v.getId()
                             + " sem próxima interseção, porém não chegou ao destino. Verificar rota.");
-                    filaVeiculos.enfileirar(v); // se quiser manter na fila para investigar
+                    filaVeiculos.enfileirar(v); 
                 }
                 continue;
             }
@@ -242,7 +237,7 @@ public class Simulacao implements Serializable {
                 v.avancar();
                 System.out.println("Veículo " + v.getId() + " avançou para " + v.getIntersecaoAtual(grafo).getId());
 
-                // Verifica se chegou ao destino após avançar
+                
                 if (v.estaNoDestino()) {
                     System.out.println("Veículo " + v.getId() + " está no destino.");
                     continue;

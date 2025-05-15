@@ -1,8 +1,6 @@
 package com.example.simulation.graph;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.simulation.datastructure.LinkedList;
 import com.example.simulation.datastructure.Node;
@@ -122,11 +120,11 @@ public class Grafo implements Serializable {
         }
     }
 
-    public List<Integer> getIdsIntersecoes() {
-        List<Integer> ids = new ArrayList<>();
+    public LinkedList<Long> getIdsIntersecoes() {
+        LinkedList<Long> ids = new LinkedList<>();
         Node<Intersecao> atual = vertices.head;
         while (atual != null) {
-            ids.add((int) atual.data.getId()); // Supondo que o id seja int
+            ids.add(atual.data.getId());
             atual = atual.next;
         }
         return ids;
