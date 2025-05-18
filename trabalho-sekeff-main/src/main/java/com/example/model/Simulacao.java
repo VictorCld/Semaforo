@@ -7,8 +7,14 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Scanner;
 
+import javax.swing.JOptionPane;
+
+import com.example.VisualizacaoSimulador;
 import com.example.simulation.datastructure.Fila;
+import com.example.simulation.datastructure.HashMap;
+import com.example.simulation.datastructure.HashSet;
 import com.example.simulation.datastructure.LinkedList;
 import com.example.simulation.datastructure.Node;
 import com.example.simulation.graph.Grafo;
@@ -25,6 +31,7 @@ public class Simulacao implements Serializable {
     private Fila<Veiculo> filaVeiculos;
     private ControladorSemaforos controladorSemaforos;
     private transient boolean rodando;
+    private transient boolean pausado;
 
     public Simulacao(Grafo grafo, GeradorVeiculos geradorVeiculos) {
         this.grafo = grafo;
@@ -73,10 +80,33 @@ public class Simulacao implements Serializable {
         }
     }
 
-    public void testarVeiculosESemaforos(int quantidadeDeVeiculos) {
+    public static void menuSimulacao(Grafo grafo, GeradorVeiculos geradorVeiculos,
+            com.example.VisualizacaoSimulador painel) {
+        Scanner scanner = new Scanner(System.in);
+
+        System.out.println("===============================================");
+        System.out.println("         SIMULADOR DE TRÁFEGO URBANO           ");
+        System.out.println("===============================================");
+        System.out.print("Digite a quantidade de veículos para simular: ");
+        int quantidadeDeVeiculos = scanner.nextInt();
+
+        System.out.println("\nEscolha o modelo de controle de semáforo:");
+        System.out.println("1 - Ciclo fixo");
+        System.out.println("2 - Otimização do tempo de espera");
+        System.out.println("3 - Otimização do consumo de energia");
+        System.out.print("Modelo: ");
+        int modelo = scanner.nextInt();
+
+        Simulacao sim = new Simulacao(grafo, geradorVeiculos);
+        sim.testarVeiculosESemaforosComModelo(quantidadeDeVeiculos, modelo, painel);
+    }
+
+    public void testarVeiculosESemaforosComModelo(int quantidadeDeVeiculos, int modelo, VisualizacaoSimulador painel) {
         System.out.println("===============================================");
         System.out.println(" INÍCIO DA SIMULAÇÃO DE VEÍCULOS E SEMÁFOROS ");
         System.out.println("===============================================");
+
+        rodando = true;
 
         geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
 
@@ -99,9 +129,27 @@ public class Simulacao implements Serializable {
         }
         System.out.println("========================================\n");
 
-        com.example.simulation.datastructure.HashSet<Long> veiculosQueChegaram = new com.example.simulation.datastructure.HashSet<>();
+        // Estruturas para estatísticas
+        HashSet<Long> veiculosQueChegaram = new HashSet<>();
+        HashMap<Long, Integer> tempoViagem = new HashMap<>();
+        HashMap<Long, Integer> tempoEspera = new HashMap<>();
+        int totalVeiculosCongestionados = 0;
         int ciclo = 0;
-        while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos) {
+
+        // --- AJUSTE: Controle de pausa e parada ---
+        while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos && rodando) {
+            // Controle de pausa
+            synchronized (this) {
+                while (pausado) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+            }
+            // ----------------------------------------
+
             System.out.println("\n-----------------------------------------------");
             System.out.printf("CICLO %d\n", ciclo);
             System.out.println("-----------------------------------------------");
@@ -110,6 +158,12 @@ public class Simulacao implements Serializable {
             for (int i = 0; i < tamanho; i++) {
                 Veiculo v = filaVeiculos.desenfileirar();
                 int numeroVeiculo = v.getNumeroSimulacao();
+
+                // Estatística: conta ciclos de viagem
+                Integer viagemAtual = tempoViagem.get(v.getId());
+                if (viagemAtual == null)
+                    viagemAtual = 0;
+                tempoViagem.put(v.getId(), viagemAtual + 1);
 
                 if (v.chegouAoDestino()) {
                     if (!veiculosQueChegaram.contem(v.getId())) {
@@ -139,6 +193,8 @@ public class Simulacao implements Serializable {
                     System.out.printf("[Veículo %d]  Avançou: %s -> %s (sem semáforo)\n", numeroVeiculo,
                             atualInter.getId(), proxima.getId());
                 } else {
+                    semaforo.atualizarCicloModelo(modelo, filaVeiculos);
+
                     TrafficLightState estado = semaforo.getEstadoAtual();
                     switch (estado) {
                         case VERDE:
@@ -147,10 +203,18 @@ public class Simulacao implements Serializable {
                                     atualInter.getId(), proxima.getId());
                             break;
                         case AMARELO:
+                            Integer esperaAmarelo = tempoEspera.get(v.getId());
+                            if (esperaAmarelo == null)
+                                esperaAmarelo = 0;
+                            tempoEspera.put(v.getId(), esperaAmarelo + 1);
                             System.out.printf("[Veículo %d]  Aguardando sinal AMARELO em %s (próximo: %s)\n",
                                     numeroVeiculo, atualInter.getId(), proxima.getId());
                             break;
                         case VERMELHO:
+                            Integer esperaVermelho = tempoEspera.get(v.getId());
+                            if (esperaVermelho == null)
+                                esperaVermelho = 0;
+                            tempoEspera.put(v.getId(), esperaVermelho + 1);
                             System.out.printf("[Veículo %d]  Aguardando sinal VERMELHO em %s (próximo: %s)\n",
                                     numeroVeiculo, atualInter.getId(), proxima.getId());
                             break;
@@ -165,11 +229,25 @@ public class Simulacao implements Serializable {
                 }
             }
 
+            // Índice de congestionamento: veículos que não avançaram neste ciclo
+            totalVeiculosCongestionados += filaVeiculos.size();
+
+            // Atualiza a interface gráfica após cada ciclo
+            if (painel != null) {
+                // Monta lista de veículos ativos usando sua LinkedList
+                LinkedList<Veiculo> veiculosAtivos = new LinkedList<>();
+                for (int i = 0; i < filaVeiculos.size(); i++) {
+                    veiculosAtivos.add(filaVeiculos.get(i));
+                }
+                painel.setVeiculos(veiculosAtivos);
+                painel.repaint();
+            }
+
             controladorSemaforos.atualizarSemaforos();
             ciclo++;
 
             try {
-                Thread.sleep(400);
+                Thread.sleep(500);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -178,6 +256,38 @@ public class Simulacao implements Serializable {
         System.out.println("\n===============================================");
         System.out.println("    TODOS OS VEÍCULOS CHEGARAM AO DESTINO!     ");
         System.out.println("===============================================");
+
+        // Estatísticas finais
+        double somaViagem = 0;
+        double somaEspera = 0;
+        Iterable<Long> chaves = tempoViagem.keySet();
+        for (Long id : chaves) {
+            somaViagem += tempoViagem.get(id);
+            Integer espera = tempoEspera.get(id);
+            if (espera != null) {
+                somaEspera += espera;
+            }
+        }
+        double tempoMedioViagem = somaViagem / quantidadeDeVeiculos;
+        double tempoMedioEspera = somaEspera / quantidadeDeVeiculos;
+        double indiceCongestionamento = (double) totalVeiculosCongestionados / ciclo;
+
+        // ...cálculo das estatísticas...
+        String estatisticas = String.format(
+                "=============== ESTATÍSTICAS DA SIMULAÇÃO ===============\n" +
+                        "Tempo médio de viagem: %.2f ciclos\n" +
+                        "Tempo médio de espera em semáforo: %.2f ciclos\n" +
+                        "Índice médio de congestionamento: %.2f veículos/ciclo\n" +
+                        "=========================================================",
+                tempoMedioViagem, tempoMedioEspera, indiceCongestionamento);
+
+        System.out.println(estatisticas);
+
+        // Mostra na tela (Swing)
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, estatisticas, "Estatísticas da Simulação",
+                    JOptionPane.INFORMATION_MESSAGE);
+        });
     }
 
     private void simularMovimentoVeiculos() {
@@ -229,13 +339,29 @@ public class Simulacao implements Serializable {
     }
 
     public void pausar() {
-        rodando = false;
+        pausado = true;
         System.out.println("Simulação pausada.");
+    }
+
+    public void continuar() {
+        pausado = false;
+        synchronized (this) {
+            notifyAll();
+        }
+        System.out.println("Simulação retomada.");
     }
 
     public void parar() {
         rodando = false;
+        pausado = false;
+        synchronized (this) {
+            notifyAll();
+        }
         System.out.println("Simulação encerrada.");
+    }
+
+    public boolean isPausado() {
+        return pausado;
     }
 
     public void salvar(String nomeArquivo) {
