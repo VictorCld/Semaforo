@@ -3,7 +3,6 @@ package com.example.model;
 import java.io.Serializable;
 import java.util.Random;
 
-import com.example.simulation.graph.Grafo;
 import com.example.simulation.graph.Intersecao;
 import com.example.simulation.traffic.semaforo.TrafficLightState;
 
