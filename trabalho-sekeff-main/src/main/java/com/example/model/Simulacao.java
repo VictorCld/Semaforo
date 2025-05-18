@@ -89,6 +89,7 @@ public class Simulacao implements Serializable {
 
         Simulacao sim = new Simulacao(grafo, geradorVeiculos);
         sim.testarVeiculosESemaforosComModelo(quantidadeDeVeiculos, modelo, painel);
+        scanner.close();
     }
 
     public void testarVeiculosESemaforosComModelo(int quantidadeDeVeiculos, int modelo, VisualizacaoSimulador painel) {

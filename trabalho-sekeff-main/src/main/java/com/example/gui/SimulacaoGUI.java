@@ -2,7 +2,6 @@ package com.example.gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 
 import com.example.VisualizacaoSimulador;
@@ -17,12 +16,7 @@ public class SimulacaoGUI extends JFrame {
     private VisualizacaoSimulador painelVisual;
     private Simulacao simulacao;
     private Thread threadSimulacao;
-    private Grafo grafo;
-    private GeradorVeiculos geradorVeiculos;
-
     public SimulacaoGUI(Grafo grafo, GeradorVeiculos geradorVeiculos) {
-        this.grafo = grafo;
-        this.geradorVeiculos = geradorVeiculos;
 
         setTitle("Controle da Simulação");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
