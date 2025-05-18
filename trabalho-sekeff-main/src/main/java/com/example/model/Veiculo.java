@@ -10,14 +10,14 @@ public class Veiculo implements Serializable {
     private static final long serialVersionUID = 1L;
     private long id;
     private LinkedList<Long> caminho;
-    private int posicaoAtual; // índice, não valor do nó
+    private int posicaoAtual; 
     private boolean chegou = false;
     private int numeroSimulacao;
 
     public Veiculo(long id, LinkedList<Long> caminho) {
         this.id = id;
         this.caminho = caminho;
-        this.posicaoAtual = 0; // começa no índice 0
+        this.posicaoAtual = 0; 
     }
 
     public Intersecao getProximaIntersecao(Grafo grafo) {

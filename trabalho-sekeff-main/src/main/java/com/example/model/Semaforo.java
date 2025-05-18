@@ -1,6 +1,8 @@
 package com.example.model;
 
 import java.io.Serializable;
+import java.util.Random;
+
 import com.example.simulation.graph.Intersecao;
 import com.example.simulation.traffic.semaforo.TrafficLightState;
 
@@ -21,11 +23,10 @@ public class Semaforo implements Serializable {
         this.tempoVerde = tempoVerde;
         this.tempoAmarelo = tempoAmarelo;
         this.tempoVermelho = tempoVermelho;
-        this.tempoAtual = 0;
+        // Começa em tempo aleatório para não sincronizar todos
+        this.tempoAtual = new Random().nextInt(tempoVermelho + 1);
     }
 
-    // Construtor antigo (mantido para compatibilidade, mas NÃO use para semáforos
-    // do grafo)
     public Semaforo(int tempoVerde, int tempoAmarelo, int tempoVermelho) {
         this(null, tempoVerde, tempoAmarelo, tempoVermelho);
     }
@@ -77,6 +78,6 @@ public class Semaforo implements Serializable {
     }
 
     public boolean podeAvancar() {
-        return true;
+        return estadoAtual == TrafficLightState.VERDE;
     }
 }

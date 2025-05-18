@@ -51,14 +51,14 @@ public class LinkedList<T> implements Iterable<T>, Serializable {
     if (head == null)
       return;
 
-    if (((Intersecao) head.data).id == id) {
+    if (((Intersecao) head.data).getId() == id) {
       head = head.next;
       return;
     }
 
     Node<T> actual = head;
     while (actual.next != null) {
-      if (((Intersecao) actual.next.data).id == id) {
+      if (((Intersecao) actual.next.data).getId() == id) {
         actual.next = actual.next.next;
         return;
       }

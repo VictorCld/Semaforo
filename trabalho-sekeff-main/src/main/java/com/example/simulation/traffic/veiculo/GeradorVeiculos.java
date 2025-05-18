@@ -49,10 +49,7 @@ public class GeradorVeiculos implements Serializable {
         }
 
         Veiculo veiculo = new Veiculo(contador++, rota);
-
-        System.out.println(
-                "Veículo " + (veiculo.getId() + 1) + " criado com rota de " + origem.getId() + " até "
-                        + destino.getId());
+        // Não imprime aqui! O número de simulação ainda não foi definido.
         return veiculo;
     }
 
@@ -65,6 +62,8 @@ public class GeradorVeiculos implements Serializable {
             Veiculo veiculo = gerarVeiculoComRota();
             if (veiculo != null) {
                 veiculo.setNumeroSimulacao(criados + 1); // Numeração sequencial a partir de 1
+                System.out.printf("[Veículo %d] Rota: %s -> %s\n", veiculo.getNumeroSimulacao(), veiculo.getOrigem(),
+                        veiculo.getDestino());
                 filaVeiculos.enfileirar(veiculo);
                 criados++;
             }

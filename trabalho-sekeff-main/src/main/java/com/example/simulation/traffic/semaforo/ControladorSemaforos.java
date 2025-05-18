@@ -28,14 +28,6 @@ public class ControladorSemaforos implements Serializable {
         }
     }
 
-    public void alternarSemaforos() {
-        Node<Intersecao> atual = grafo.vertices.head;
-        while (atual != null) {
-            atual.data.alternarEstadosOpostos(); // Alterna verde/amarelo/vermelho
-            atual = atual.next;
-        }
-    }
-
     public LinkedList<Semaforo> getSemaforos() {
         LinkedList<Semaforo> semaforos = new LinkedList<>();
         Node<Intersecao> atual = grafo.vertices.head;
@@ -49,3 +41,5 @@ public class ControladorSemaforos implements Serializable {
         return semaforos;
     }
 }
+
+

@@ -31,7 +31,7 @@ public class HashSet<T> implements Serializable {
         No<T> atual = tabela[indice];
         while (atual != null) {
             if (atual.valor.equals(valor)) {
-                return; // Já existe
+                return; 
             }
             atual = atual.proximo;
         }

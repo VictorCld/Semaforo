@@ -11,22 +11,25 @@ import com.example.simulation.graph.Intersecao;
 public class GeradorDeSemaforos implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    public GeradorDeSemaforos() {
-       
-    }
+    public GeradorDeSemaforos() {}
 
-    public void configurarSemaforos(Grafo grafo) {
-    int tempoVerde = 1;
-    int tempoAmarelo = 1;
-    int tempoVermelho = 1;
+    public void configurarSemaforos(Grafo grafo, int tempoVerde, int tempoAmarelo, int tempoVermelho) {
+        Node<Intersecao> atual = grafo.vertices.head;
+        while (atual != null) {
+            Intersecao intersecao = atual.data;
 
-    Node<Intersecao> atual = grafo.vertices.head;
-    while (atual != null) {
-        Intersecao intersecao = atual.data;
-        Semaforo s = new Semaforo(intersecao, tempoVerde, tempoAmarelo, tempoVermelho);
-        intersecao.setSemaforo(s);
-        atual = atual.next;
+            if (intersecao.getSemaforo() == null) {
+                Semaforo s = new Semaforo(intersecao, tempoVerde, tempoAmarelo, tempoVermelho);
+                intersecao.setSemaforo(s);
+
+                // Criar grupo e adicionar semáforo
+                GrupoSemaforo grupo = new GrupoSemaforo();
+                grupo.adicionarSemaforo(s);
+                intersecao.configurarGrupoSemaforo(grupo);
+            }
+
+            atual = atual.next;
+        }
     }
-}
 }
 

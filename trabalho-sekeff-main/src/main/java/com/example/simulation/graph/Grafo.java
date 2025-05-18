@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.example.simulation.datastructure.LinkedList;
 import com.example.simulation.datastructure.Node;
+import com.example.model.Semaforo;
 
 public class Grafo implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -11,6 +12,20 @@ public class Grafo implements Serializable {
 
     public Grafo() {
         this.vertices = new LinkedList<Intersecao>();
+    }
+
+    // Método para adicionar vértice com lat/lon
+    public void addVertice(long id, double latitude, double longitude) {
+        if (!containsVertice(id)) {
+            Intersecao intersecao = new Intersecao(id, latitude, longitude);
+            vertices.add(intersecao);
+        }
+    }
+
+    // Mantém o método antigo para compatibilidade, mas pode ser removido se não
+    // usar mais
+    public void addVertice(Intersecao intersecao) {
+        vertices.add(intersecao);
     }
 
     public void addRua(long origem, long destino, int tempoTravessia) {
@@ -25,12 +40,6 @@ public class Grafo implements Serializable {
         origemIntersecao.adjacentes.add(rua);
     }
 
-    public void addVertice(long id) {
-        if (!containsVertice(id)) {
-            vertices.add(new Intersecao(id));
-        }
-    }
-
     public int size() {
         return vertices.tamanho();
     }
@@ -41,22 +50,22 @@ public class Grafo implements Serializable {
         if (vRemover == null)
             return;
 
-        Node<Intersecao> actual = vertices.head;
-        while (actual != null) {
-            actual.data.adjacentes.remove(id);
-            actual = actual.next;
+        Node<Intersecao> atual = vertices.head;
+        while (atual != null) {
+            atual.data.adjacentes.remove(id);
+            atual = atual.next;
         }
 
         vertices.removerVertice(id);
     }
 
     public Intersecao obterVertice(long id) {
-        Node<Intersecao> actual = vertices.head;
-        while (actual != null) {
-            if (actual.data.id == id) {
-                return actual.data;
+        Node<Intersecao> atual = vertices.head;
+        while (atual != null) {
+            if (atual.data.getId() == id) {
+                return atual.data;
             }
-            actual = actual.next;
+            atual = atual.next;
         }
         return null;
     }
@@ -78,32 +87,26 @@ public class Grafo implements Serializable {
     }
 
     public boolean containsVertice(long id) {
-        Node<Intersecao> actual = vertices.head;
-        while (actual != null) {
-            if (actual.data.id == id) {
+        Node<Intersecao> atual = vertices.head;
+        while (atual != null) {
+            if (atual.data.getId() == id) {
                 return true;
             }
-            actual = actual.next;
+            atual = atual.next;
         }
         return false;
     }
 
     public Intersecao obterIntersecaoPorId(long id) {
-        Node<Intersecao> atual = vertices.head;
-        while (atual != null) {
-            if (atual.data.getId() == id) {
-                return atual.data;
-            }
-            atual = atual.next;
-        }
-        return null;
+        return obterVertice(id);
     }
 
     public void printGraph() {
         Node<Intersecao> atual = vertices.head;
         while (atual != null) {
             Intersecao intersecao = atual.data;
-            System.out.println("Interseção " + intersecao.getId() + ":");
+            System.out.println("Interseção " + intersecao.getId() + " (lat: " + intersecao.latitude + ", lon: "
+                    + intersecao.longitude + "):");
 
             Node<Rua> ruaAtual = intersecao.adjacentes.head;
             if (ruaAtual == null) {
@@ -115,7 +118,7 @@ public class Grafo implements Serializable {
                 System.out.println("   -> Para: " + rua.destino + " | Tempo: " + rua.getTempoTravessia() + "s");
                 ruaAtual = ruaAtual.next;
             }
-            System.out.println(); // Linha em branco para separar interseções
+            System.out.println();
             atual = atual.next;
         }
     }
@@ -132,5 +135,18 @@ public class Grafo implements Serializable {
 
     public LinkedList<Rua> obterArestasDe(Intersecao intersecao) {
         return intersecao.adjacentes;
+    }
+
+    public LinkedList<Semaforo> getSemaforos() {
+        LinkedList<Semaforo> semaforos = new LinkedList<>();
+        Node<Intersecao> atual = vertices.head;
+        while (atual != null) {
+            Intersecao intersecao = atual.data;
+            if (intersecao.getSemaforo() != null) {
+                semaforos.add(intersecao.getSemaforo());
+            }
+            atual = atual.next;
+        }
+        return semaforos;
     }
 }

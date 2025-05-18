@@ -54,7 +54,7 @@ public class Dijkstra implements Serializable {
         LinkedList<Long> caminhoIds = new LinkedList<>();
         while (!caminhoFila.isEmpty()) {
             Intersecao intersecao = caminhoFila.desenfileirar();
-            caminhoIds.add(intersecao.id); // Use long, não faça cast para int!
+            caminhoIds.add(intersecao.getId()); // Use long, não faça cast para int!
         }
         return caminhoIds;
     }

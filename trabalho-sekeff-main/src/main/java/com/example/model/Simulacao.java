@@ -7,15 +7,13 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.Scanner;
 
-import com.example.CidadeJson.ImportadorDeGrafo;
 import com.example.simulation.datastructure.Fila;
 import com.example.simulation.datastructure.LinkedList;
+import com.example.simulation.datastructure.Node;
 import com.example.simulation.graph.Grafo;
 import com.example.simulation.graph.Intersecao;
 import com.example.simulation.traffic.semaforo.ControladorSemaforos;
-import com.example.simulation.traffic.semaforo.GeradorDeSemaforos;
 import com.example.simulation.traffic.semaforo.TrafficLightState;
 import com.example.simulation.traffic.veiculo.GeradorVeiculos;
 
@@ -35,7 +33,6 @@ public class Simulacao implements Serializable {
         this.controladorSemaforos = new ControladorSemaforos(grafo);
     }
 
-    //pensar se vou usar
     private LinkedList<Semaforo> coletarSemaforos() {
         LinkedList<Semaforo> semaforos = new LinkedList<>();
         for (Intersecao intersecao : grafo.vertices) {
@@ -58,14 +55,13 @@ public class Simulacao implements Serializable {
             simularMovimentoVeiculos();
 
             try {
-                Thread.sleep(1000); 
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
     }
 
-    
     private void mostrarEstadoSemaforos() {
         System.out.println("Estado dos semáforos:");
         for (Semaforo s : controladorSemaforos.getSemaforos()) {
@@ -82,15 +78,33 @@ public class Simulacao implements Serializable {
         System.out.println(" INÍCIO DA SIMULAÇÃO DE VEÍCULOS E SEMÁFOROS ");
         System.out.println("===============================================");
 
-        GeradorDeSemaforos geradorDeSemaforos = new GeradorDeSemaforos();
-        geradorDeSemaforos.configurarSemaforos(grafo);
-
         geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
+
+        // Exibe as rotas completas dos veículos
+        System.out.println("\n========== ROTAS DOS VEÍCULOS ==========");
+        for (int i = 0; i < filaVeiculos.size(); i++) {
+            Veiculo v = filaVeiculos.get(i);
+            System.out.println();
+            System.out.printf(" [Veículo %d] = ", v.getNumeroSimulacao());
+            LinkedList<Long> rota = v.getCaminho();
+            Node<Long> atual = rota.head;
+            while (atual != null) {
+                System.out.print(atual.data);
+                if (atual.next != null) {
+                    System.out.print("  ->  ");
+                }
+                atual = atual.next;
+            }
+            System.out.println();
+        }
+        System.out.println("========================================\n");
 
         com.example.simulation.datastructure.HashSet<Long> veiculosQueChegaram = new com.example.simulation.datastructure.HashSet<>();
         int ciclo = 0;
         while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos) {
-            System.out.println("\n========== CICLO " + ciclo + " ==========");
+            System.out.println("\n-----------------------------------------------");
+            System.out.printf("CICLO %d\n", ciclo);
+            System.out.println("-----------------------------------------------");
 
             int tamanho = filaVeiculos.size();
             for (int i = 0; i < tamanho; i++) {
@@ -100,19 +114,19 @@ public class Simulacao implements Serializable {
                 if (v.chegouAoDestino()) {
                     if (!veiculosQueChegaram.contem(v.getId())) {
                         veiculosQueChegaram.adicionar(v.getId());
-                        System.out.println(" Veículo " + numeroVeiculo + " chegou ao destino final: " + v.getDestino());
+                        System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
                     }
                     continue;
                 }
 
                 Intersecao proxima = v.getProximaIntersecao(grafo);
-                Intersecao atual = v.getIntersecaoAtual(grafo);
+                Intersecao atualInter = v.getIntersecaoAtual(grafo);
 
                 if (proxima == null) {
                     if (v.estaNoDestino() && !veiculosQueChegaram.contem(v.getId())) {
                         v.marcarChegou();
                         veiculosQueChegaram.adicionar(v.getId());
-                        System.out.println(" Veículo " + numeroVeiculo + " chegou ao destino final: " + v.getDestino());
+                        System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
                     } else {
                         filaVeiculos.enfileirar(v);
                     }
@@ -122,23 +136,23 @@ public class Simulacao implements Serializable {
                 Semaforo semaforo = proxima.getSemaforo();
                 if (semaforo == null) {
                     v.avancar();
-                    System.out.println(" Veículo " + numeroVeiculo + " avançou de " + atual.getId() + " para -> "
-                            + proxima.getId() + " (sem semáforo).");
+                    System.out.printf("[Veículo %d]  Avançou: %s -> %s (sem semáforo)\n", numeroVeiculo,
+                            atualInter.getId(), proxima.getId());
                 } else {
                     TrafficLightState estado = semaforo.getEstadoAtual();
                     switch (estado) {
                         case VERDE:
                             v.avancar();
-                            System.out.println(" Veículo " + numeroVeiculo + " passou no sinal VERDE: " + atual.getId()
-                                    + " -> " + proxima.getId());
+                            System.out.printf("[Veículo %d]  Passou no sinal VERDE: %s -> %s\n", numeroVeiculo,
+                                    atualInter.getId(), proxima.getId());
                             break;
                         case AMARELO:
-                            System.out.println(" Veículo " + numeroVeiculo + " aguardando no sinal AMARELO em "
-                                    + atual.getId() + " (destino: " + proxima.getId() + ")");
+                            System.out.printf("[Veículo %d]  Aguardando sinal AMARELO em %s (próximo: %s)\n",
+                                    numeroVeiculo, atualInter.getId(), proxima.getId());
                             break;
                         case VERMELHO:
-                            System.out.println(" Veículo " + numeroVeiculo + " aguardando no sinal VERMELHO em "
-                                    + atual.getId() + " (destino: " + proxima.getId() + ")");
+                            System.out.printf("[Veículo %d]  Aguardando sinal VERMELHO em %s (próximo: %s)\n",
+                                    numeroVeiculo, atualInter.getId(), proxima.getId());
                             break;
                     }
                 }
@@ -147,56 +161,23 @@ public class Simulacao implements Serializable {
                     filaVeiculos.enfileirar(v);
                 } else if (!veiculosQueChegaram.contem(v.getId())) {
                     veiculosQueChegaram.adicionar(v.getId());
-                    System.out.println(" Veículo " + numeroVeiculo + " chegou ao destino final: " + v.getDestino());
+                    System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
                 }
             }
 
             controladorSemaforos.atualizarSemaforos();
             ciclo++;
+
+            try {
+                Thread.sleep(400);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
         }
 
         System.out.println("\n===============================================");
         System.out.println("    TODOS OS VEÍCULOS CHEGARAM AO DESTINO!     ");
         System.out.println("===============================================");
-    }
-
-    public static void executarSimulacaoTerminal() {
-        Scanner scanner = new Scanner(System.in);
-
-        System.out.println("===============================================");
-        System.out.println("      SIMULADOR DE TRÂNSITO - SEKEFF");
-        System.out.println("===============================================");
-        System.out.print("Digite a quantidade de veículos para simular: ");
-        int quantidadeVeiculos = 0;
-        while (quantidadeVeiculos <= 0) {
-            try {
-                quantidadeVeiculos = Integer.parseInt(scanner.nextLine());
-                if (quantidadeVeiculos <= 0) {
-                    System.out.print("Por favor, digite um número positivo: ");
-                }
-            } catch (NumberFormatException e) {
-                System.out.print("Entrada inválida. Digite um número inteiro: ");
-            }
-        }
-
-        Grafo grafo = null;
-        try {
-            grafo = ImportadorDeGrafo.importarDeArquivoUnico(
-                    "C:\\Users\\victo\\Downloads\\trabalho-sekeff-main\\trabalho-sekeff-main\\src\\main\\java\\com\\example\\CidadeJson\\CentroTeresinaPiauíBrazil.json");
-        } catch (Exception e) {
-            System.out.println("Erro ao importar o grafo: " + e.getMessage());
-            scanner.close();
-            return;
-        }
-
-        Simulacao sim = new Simulacao(grafo, new GeradorVeiculos(grafo));
-        System.out.println("\nIniciando simulação com " + quantidadeVeiculos + " veículos...\n");
-        sim.testarVeiculosESemaforos(quantidadeVeiculos);
-
-        System.out.println("\n===============================================");
-        System.out.println("      FIM DA SIMULAÇÃO");
-        System.out.println("===============================================");
-        scanner.close();
     }
 
     private void simularMovimentoVeiculos() {
@@ -210,7 +191,6 @@ public class Simulacao implements Serializable {
 
             if (v.chegouAoDestino()) {
                 System.out.println("Veículo " + v.getId() + " chegou ao destino.");
-                
                 continue;
             }
 
@@ -219,11 +199,10 @@ public class Simulacao implements Serializable {
             if (proxima == null) {
                 if (v.chegouAoDestino()) {
                     System.out.println("Veículo " + v.getId() + " chegou ao destino.");
-                    
                 } else {
                     System.out.println("Veículo " + v.getId()
                             + " sem próxima interseção, porém não chegou ao destino. Verificar rota.");
-                    filaVeiculos.enfileirar(v); 
+                    filaVeiculos.enfileirar(v);
                 }
                 continue;
             }
@@ -237,7 +216,6 @@ public class Simulacao implements Serializable {
                 v.avancar();
                 System.out.println("Veículo " + v.getId() + " avançou para " + v.getIntersecaoAtual(grafo).getId());
 
-                
                 if (v.estaNoDestino()) {
                     System.out.println("Veículo " + v.getId() + " está no destino.");
                     continue;
