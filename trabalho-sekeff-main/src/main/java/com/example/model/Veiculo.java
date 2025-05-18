@@ -10,14 +10,14 @@ public class Veiculo implements Serializable {
     private static final long serialVersionUID = 1L;
     private long id;
     private LinkedList<Long> caminho;
-    private int posicaoAtual; 
+    private int posicaoAtual;
     private boolean chegou = false;
     private int numeroSimulacao;
 
     public Veiculo(long id, LinkedList<Long> caminho) {
         this.id = id;
         this.caminho = caminho;
-        this.posicaoAtual = 0; 
+        this.posicaoAtual = 0;
     }
 
     public Intersecao getProximaIntersecao(Grafo grafo) {
@@ -71,7 +71,7 @@ public class Veiculo implements Serializable {
     }
 
     public boolean chegouAoDestino() {
-        return estaNoDestino();
+        return chegou || estaNoDestino();
     }
 
     public void marcarChegou() {
@@ -102,7 +102,19 @@ public class Veiculo implements Serializable {
     }
 
     public int getNumeroSimulacao() {
-    return this.numeroSimulacao;
-}
+        return this.numeroSimulacao;
+    }
+
+    public Long getIntersecaoAtualId(Grafo grafo) {
+        // Retorna o ID da interseção atual do veículo
+        Intersecao atual = this.getIntersecaoAtual(grafo); // ou use o campo correspondente se já existir
+        return (atual != null) ? atual.getId() : null;
+    }
+
+    public Long getProximaIntersecaoId(Grafo grafo) {
+        // Retorna o ID da próxima interseção do veículo
+        Intersecao proxima = this.getProximaIntersecao(grafo); // ou use o campo correspondente se já existir
+        return (proxima != null) ? proxima.getId() : null;
+    }
 
 }

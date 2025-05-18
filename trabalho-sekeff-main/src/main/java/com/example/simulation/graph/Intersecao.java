@@ -6,7 +6,6 @@ import com.example.model.Semaforo;
 import com.example.simulation.datastructure.LinkedList;
 import com.example.simulation.traffic.semaforo.GrupoSemaforo;
 
-
 public class Intersecao implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -14,6 +13,7 @@ public class Intersecao implements Serializable {
     public LinkedList<Rua> adjacentes;
     public GrupoSemaforo gs;
     private Semaforo semaforo;
+    private Grafo grafo;
 
     public double latitude;
     public double longitude;
@@ -72,5 +72,13 @@ public class Intersecao implements Serializable {
 
     public void configurarGrupoSemaforo(GrupoSemaforo gs) {
         this.gs = gs;
+    }
+
+    public void setGrafo(Grafo grafo) {
+        this.grafo = grafo;
+    }
+
+    public Grafo getGrafo() {
+        return this.grafo;
     }
 }
