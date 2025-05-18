@@ -1,10 +1,10 @@
-# 🚦 Trabalho Sekeff - Simulador de Tráfego Urbano
+ 🚦 Trabalho Sekeff - Simulador de Tráfego Urbano
 
 Bem-vindo ao **Trabalho Sekeff**, um simulador de tráfego urbano desenvolvido em Java, com interface gráfica e integração de dados reais de mapas. O projeto permite simular o fluxo de veículos em uma malha urbana, controlando semáforos com diferentes modelos de operação e visualizando o resultado em tempo real.
 
 ---
 
-## ✨ Funcionalidades
+ ✨ Funcionalidades
 
 - **Importação de mapas reais** (formato JSON), com interseções, ruas e semáforos.
 - **Simulação de veículos**, com rotas automáticas e movimentação dinâmica.
@@ -21,7 +21,8 @@ Bem-vindo ao **Trabalho Sekeff**, um simulador de tráfego urbano desenvolvido e
 
 ---
 
-## 🗂️ Estrutura do Projeto
+ 🗂️ Estrutura do Projeto
+ ```
 trabalho-sekeff-main/
 ├── src/
 │ ├── main/
@@ -38,28 +39,28 @@ trabalho-sekeff-main/
 ├── pom.xml
 ├── mvnw / mvnw.cmd
 └── .mvn/
-
+```
 ---
 
-## 🚀 Como Executar
+ 🚀 Como Executar
 
-### 1. Pré-requisitos
+ 1. Pré-requisitos
 
 - Java 17 ou superior  
 - Maven
 
-### 2. Clone o repositório
+ 2. Clone o repositório
 
 ```bash
 git clone https://github.com/seu-usuario/seu-repo.git
 cd trabalho-sekeff-main
 ```
 
-### 3. Build do projeto
+ 3. Build do projeto
 
 -  ./mvnw clean package
 
-### 4. Execute a aplicação
+ 4. Execute a aplicação
 -  ./mvnw clean package
 
 ### 5. Use a interface gráfica
@@ -67,7 +68,7 @@ Configure e inicie as simulações de forma interativa.
 
 ---
 
-## 🧭 Como Usar
+ 🧭 Como Usar
 
 - Ao iniciar, selecione o arquivo de mapa (formato JSON).
 - Configure o número de veículos e o modelo de semáforo desejado.
@@ -76,7 +77,7 @@ Configure e inicie as simulações de forma interativa.
 
 ---
 
-## 🛠️ Tecnologias Utilizadas
+ 🛠️ Tecnologias Utilizadas
 
 - Java 17+
 - Maven
