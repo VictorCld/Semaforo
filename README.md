@@ -95,4 +95,4 @@ Configure e inicie as simulações de forma interativa.
 
 ## 👨‍💻 Créditos
 
-Desenvolvido por **\[Victor Gabriel]** para a disciplina de **Estrutura de Dados**.
+Desenvolvido por **\[ Victor Gabriel ]** para a disciplina de **Estrutura de Dados**.
