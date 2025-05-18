@@ -116,11 +116,7 @@ public class VisualizacaoSimulador extends JPanel {
                 Intersecao inter = grafo.obterIntersecaoPorId(idInter);
                 if (inter != null) {
                     Point p = converterCoordenadas(inter.latitude, inter.longitude, minLat, maxLat, minLon, maxLon);
-                    if (v.chegouAoDestino()) {
-                        g.setColor(Color.GREEN);
-                    } else {
-                        g.setColor(Color.BLUE);
-                    }
+                    g.setColor(Color.BLUE);
                     g.fillOval(p.x - 6, p.y - 6, 14, 14);
                 }
             }
