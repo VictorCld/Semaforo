@@ -23,7 +23,7 @@ public class Semaforo implements Serializable {
         this.tempoVerde = tempoVerde;
         this.tempoAmarelo = tempoAmarelo;
         this.tempoVermelho = tempoVermelho;
-        // Começa em tempo aleatório para não sincronizar todos
+        
         this.tempoAtual = new Random().nextInt(tempoVermelho + 1);
     }
 
@@ -94,9 +94,9 @@ public class Semaforo implements Serializable {
                 int filaNaIntersecao = contarVeiculosNaIntersecao(this.getIntersecao(), filaVeiculos);
                 int tempoVerde = 5 + filaNaIntersecao * 2; // Exemplo: cada veículo na fila aumenta 2s
                 if (tempoVerde > 30)
-                    tempoVerde = 30; // Limite máximo
+                    tempoVerde = 30; 
                 if (tempoVerde < 5)
-                    tempoVerde = 5; // Limite mínimo
+                    tempoVerde = 5; 
                 this.setTempoVerde(tempoVerde);
                 this.setTempoAmarelo(3);
                 this.setTempoVermelho(10);
@@ -126,7 +126,7 @@ public class Semaforo implements Serializable {
         int count = 0;
         for (int i = 0; i < filaVeiculos.size(); i++) {
             Veiculo v = filaVeiculos.get(i);
-            // Verifica se a próxima interseção do veículo é igual à deste semáforo
+            
             Intersecao proxima = v.getProximaIntersecao(intersecao.getGrafo());
             if (proxima != null && proxima.equals(intersecao)) {
                 count++;

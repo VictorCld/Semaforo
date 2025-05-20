@@ -12,12 +12,12 @@ public class GrupoSemaforo implements Serializable {
 
     public GrupoSemaforo() {}
 
-    // Adiciona semáforo ao grupo
+    
     public void adicionarSemaforo(Semaforo s) {
         semaforos.add(s);
     }
 
-    // Retorna o número de semáforos no grupo
+    
     public int quantidade() {
         return semaforos.tamanho();
     }

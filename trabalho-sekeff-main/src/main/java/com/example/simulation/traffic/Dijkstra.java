@@ -32,7 +32,7 @@ public class Dijkstra implements Serializable {
             if (atual == null)
                 break;
             if (atual.equals(destino))
-                break; // Para cedo se chegou no destino
+                break; 
 
             visitados.adicionar(atual);
 
@@ -54,7 +54,7 @@ public class Dijkstra implements Serializable {
         LinkedList<Long> caminhoIds = new LinkedList<>();
         while (!caminhoFila.isEmpty()) {
             Intersecao intersecao = caminhoFila.desenfileirar();
-            caminhoIds.add(intersecao.getId()); // Use long, não faça cast para int!
+            caminhoIds.add(intersecao.getId()); 
         }
         return caminhoIds;
     }
@@ -77,15 +77,15 @@ public class Dijkstra implements Serializable {
         PilhaEncadeada<Intersecao> pilha = new PilhaEncadeada<>();
         Intersecao atual = destino;
 
-        // Monta a pilha de destino até origem (ou null)
+        
         while (atual != null) {
             pilha.empilhar(atual);
             atual = anteriores.get(atual);
         }
 
-        // Verifica se o caminho encontrado começa na origem
+        
         if (pilha.estaVazia() || !pilha.getTopo().equals(origem)) {
-            // Não encontrou caminho válido
+            
             return new Fila<>();
         }
 

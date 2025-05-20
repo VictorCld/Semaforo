@@ -106,14 +106,14 @@ public class Veiculo implements Serializable {
     }
 
     public Long getIntersecaoAtualId(Grafo grafo) {
-        // Retorna o ID da interseção atual do veículo
-        Intersecao atual = this.getIntersecaoAtual(grafo); // ou use o campo correspondente se já existir
+        
+        Intersecao atual = this.getIntersecaoAtual(grafo); 
         return (atual != null) ? atual.getId() : null;
     }
 
     public Long getProximaIntersecaoId(Grafo grafo) {
-        // Retorna o ID da próxima interseção do veículo
-        Intersecao proxima = this.getProximaIntersecao(grafo); // ou use o campo correspondente se já existir
+        
+        Intersecao proxima = this.getProximaIntersecao(grafo); 
         return (proxima != null) ? proxima.getId() : null;
     }
 

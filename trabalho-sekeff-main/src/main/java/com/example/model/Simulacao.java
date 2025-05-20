@@ -101,7 +101,7 @@ public class Simulacao implements Serializable {
 
     geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
 
-    // Exibe as rotas completas dos veículos
+    
     System.out.println("\n========== ROTAS DOS VEÍCULOS ==========");
     for (int i = 0; i < filaVeiculos.size(); i++) {
         Veiculo v = filaVeiculos.get(i);
@@ -120,19 +120,19 @@ public class Simulacao implements Serializable {
     }
     System.out.println("========================================\n");
 
-    // Estruturas para estatísticas
+    
     HashSet<Long> veiculosQueChegaram = new HashSet<>();
     HashMap<Long, Integer> tempoViagem = new HashMap<>();
     HashMap<Long, Integer> tempoEspera = new HashMap<>();
     int totalVeiculosCongestionados = 0;
     int ciclo = 0;
 
-    // Marca o tempo de início da simulação
+    
     long inicioSimulacao = System.currentTimeMillis();
 
-    // --- AJUSTE: Controle de pausa e parada ---
+    
     while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos && rodando) {
-        // Controle de pausa
+        
         synchronized (this) {
             while (pausado) {
                 try {
@@ -153,7 +153,7 @@ public class Simulacao implements Serializable {
             Veiculo v = filaVeiculos.desenfileirar();
             int numeroVeiculo = v.getNumeroSimulacao();
 
-            // Estatística: conta ciclos de viagem
+            
             Integer viagemAtual = tempoViagem.get(v.getId());
             if (viagemAtual == null)
                 viagemAtual = 0;
@@ -223,12 +223,12 @@ public class Simulacao implements Serializable {
             }
         }
 
-        // Índice de congestionamento: veículos que não avançaram neste ciclo
+        
         totalVeiculosCongestionados += filaVeiculos.size();
 
-        // Atualiza a interface gráfica após cada ciclo
+        
         if (painel != null) {
-            // Monta lista de veículos ativos usando sua LinkedList
+           
             LinkedList<Veiculo> veiculosAtivos = new LinkedList<>();
             for (int i = 0; i < filaVeiculos.size(); i++) {
                 veiculosAtivos.add(filaVeiculos.get(i));
@@ -247,7 +247,7 @@ public class Simulacao implements Serializable {
         }
     }
 
-    // Marca o tempo de fim da simulação
+    
     long fimSimulacao = System.currentTimeMillis();
     double duracaoSegundos = (fimSimulacao - inicioSimulacao) / 1000.0;
 
@@ -255,7 +255,7 @@ public class Simulacao implements Serializable {
     System.out.println("    TODOS OS VEÍCULOS CHEGARAM AO DESTINO!     ");
     System.out.println("===============================================");
 
-    // Estatísticas finais
+    
     double somaViagem = 0;
     double somaEspera = 0;
     Iterable<Long> chaves = tempoViagem.keySet();
@@ -282,7 +282,7 @@ public class Simulacao implements Serializable {
 
     System.out.println(estatisticas);
 
-    // Mostra na tela (Swing)
+    
     javax.swing.SwingUtilities.invokeLater(() -> {
         JOptionPane.showMessageDialog(null, estatisticas, "Estatísticas da Simulação",
                 JOptionPane.INFORMATION_MESSAGE);
