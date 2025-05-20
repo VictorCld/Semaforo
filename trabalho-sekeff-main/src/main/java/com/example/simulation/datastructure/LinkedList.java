@@ -87,12 +87,12 @@ public class LinkedList<T> implements Iterable<T>, Serializable {
     return false;
   }
 
-  // ORIGEM DO CAMINHO
+  
   public T getPrimeiro() {
     return head != null ? head.data : null;
   }
 
-  // CAMINHO QUE O VEICULO VAI
+  
   public T getProximo(T valorAtual) {
     Node<T> atual = head;
     while (atual != null && atual.next != null) {
@@ -129,7 +129,7 @@ public class LinkedList<T> implements Iterable<T>, Serializable {
     Node<T> current = head;
 
     while (current != null) {
-      sb.append(current.data); // ou current.value dependendo do seu nome
+      sb.append(current.data); 
       if (current.next != null) {
         sb.append(" -> ");
       }

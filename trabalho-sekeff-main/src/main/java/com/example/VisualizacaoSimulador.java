@@ -14,7 +14,7 @@ import com.example.model.Veiculo;
 
 public class VisualizacaoSimulador extends JPanel {
     private Grafo grafo;
-    private LinkedList<Veiculo> veiculos; // Lista dos veículos ativos
+    private LinkedList<Veiculo> veiculos; 
 
     private static final int WIDTH = 900;
     private static final int HEIGHT = 700;
@@ -25,7 +25,7 @@ public class VisualizacaoSimulador extends JPanel {
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
     }
 
-    // Permite atualizar a lista de veículos a cada ciclo
+    
     public void setVeiculos(LinkedList<Veiculo> veiculos) {
         this.veiculos = veiculos;
     }
@@ -41,7 +41,7 @@ public class VisualizacaoSimulador extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        // Descubra os limites das coordenadas
+        
         double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
         double minLon = Double.MAX_VALUE, maxLon = -Double.MAX_VALUE;
         for (int i = 0; i < grafo.vertices.tamanho(); i++) {
@@ -56,7 +56,7 @@ public class VisualizacaoSimulador extends JPanel {
                 maxLon = inter.longitude;
         }
 
-        // Desenha ruas (arestas)
+        
         for (int i = 0; i < grafo.vertices.tamanho(); i++) {
             Intersecao origem = grafo.vertices.get(i);
             Point p1 = converterCoordenadas(origem.latitude, origem.longitude, minLat, maxLat, minLon, maxLon);
@@ -72,8 +72,7 @@ public class VisualizacaoSimulador extends JPanel {
             }
         }
 
-        // Descobre quais interseções têm veículos (para mostrar apenas os semáforos
-        // relevantes)
+        
         HashSet<Long> intersecoesComVeiculos = new HashSet<>();
         for (int i = 0; i < veiculos.tamanho(); i++) {
             Veiculo v = veiculos.get(i);
@@ -85,14 +84,14 @@ public class VisualizacaoSimulador extends JPanel {
                 intersecoesComVeiculos.adicionar(proxId);
         }
 
-        // Desenha interseções (nós) e semáforos apenas onde há veículos
+        
         for (int i = 0; i < grafo.vertices.tamanho(); i++) {
             Intersecao inter = grafo.vertices.get(i);
             Point p = converterCoordenadas(inter.latitude, inter.longitude, minLat, maxLat, minLon, maxLon);
             g.setColor(Color.BLACK);
             g.fillOval(p.x - 5, p.y - 5, 12, 12);
 
-            // Desenha o semáforo só se algum veículo vai passar por aqui
+            
             if (intersecoesComVeiculos.contem(inter.getId())) {
                 Semaforo semaforo = inter.getSemaforo();
                 if (semaforo != null) {
@@ -108,7 +107,7 @@ public class VisualizacaoSimulador extends JPanel {
             }
         }
 
-        // Desenha os veículos (círculos azuis)
+        
         for (int i = 0; i < veiculos.tamanho(); i++) {
             Veiculo v = veiculos.get(i);
             Long idInter = v.getIntersecaoAtualId(grafo);

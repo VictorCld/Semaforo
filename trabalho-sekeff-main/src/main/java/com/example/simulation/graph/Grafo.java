@@ -14,7 +14,7 @@ public class Grafo implements Serializable {
         this.vertices = new LinkedList<Intersecao>();
     }
 
-    // Método para adicionar vértice com lat/lon
+   
     public void addVertice(long id, double latitude, double longitude) {
         if (!containsVertice(id)) {
             Intersecao intersecao = new Intersecao(id, latitude, longitude);
@@ -22,8 +22,7 @@ public class Grafo implements Serializable {
         }
     }
 
-    // Mantém o método antigo para compatibilidade, mas pode ser removido se não
-    // usar mais
+    
     public void addVertice(Intersecao intersecao) {
         vertices.add(intersecao);
     }

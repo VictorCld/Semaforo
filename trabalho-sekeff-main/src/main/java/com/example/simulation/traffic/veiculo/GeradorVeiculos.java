@@ -28,10 +28,10 @@ public class GeradorVeiculos implements Serializable {
         Intersecao origem = sortearIntersecao();
         Intersecao destino = sortearIntersecaoDiferente(origem);
 
-        // Supondo que Dijkstra retorna LinkedList<Integer> com IDs das interseções
+       
         LinkedList<Long> rota = Dijkstra.encontrarMenorCaminho(grafo, origem, destino);
 
-        // Validação: garanta que todos os ids da rota existem no grafo
+        
         boolean rotaValida = true;
         Node<Long> atual = rota.head;
         while (atual != null) {
@@ -44,24 +44,24 @@ public class GeradorVeiculos implements Serializable {
         }
 
         if (!rotaValida || rota.getSize() < 2) {
-            // Se a rota não for válida ou tiver menos de 2 pontos, não cria o veículo
+           
             return null;
         }
 
         Veiculo veiculo = new Veiculo(contador++, rota);
-        // Não imprime aqui! O número de simulação ainda não foi definido.
+        
         return veiculo;
     }
 
     public void gerarMultiplosVeiculos(int quantidade, Fila<Veiculo> filaVeiculos) {
         int criados = 0;
         int tentativas = 0;
-        int maxTentativas = quantidade * 10; // Limite para evitar loop infinito
+        int maxTentativas = quantidade * 10;
 
         while (criados < quantidade && tentativas < maxTentativas) {
             Veiculo veiculo = gerarVeiculoComRota();
             if (veiculo != null) {
-                veiculo.setNumeroSimulacao(criados + 1); // Numeração sequencial a partir de 1
+                veiculo.setNumeroSimulacao(criados + 1); 
                 System.out.printf("[Veículo %d] Rota: %s -> %s\n", veiculo.getNumeroSimulacao(), veiculo.getOrigem(),
                         veiculo.getDestino());
                 filaVeiculos.enfileirar(veiculo);
@@ -76,7 +76,7 @@ public class GeradorVeiculos implements Serializable {
     }
 
     private Intersecao sortearIntersecao() {
-        int tamanho = grafo.vertices.tamanho(); // usa size() do LinkedList
+        int tamanho = grafo.vertices.tamanho(); 
         int indice = random.nextInt(tamanho);
         Node<Intersecao> atual = grafo.vertices.head;
         for (int i = 0; i < indice; i++) {

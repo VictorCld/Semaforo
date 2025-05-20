@@ -30,7 +30,7 @@ public class TrabalhoSekeffApplication {
 
             GeradorVeiculos geradorVeiculos = new GeradorVeiculos(grafo);
 
-            // Inicia a interface gráfica de controle da simulação
+        
             new SimulacaoGUI(grafo, geradorVeiculos);
 
         } catch (Exception e) {
