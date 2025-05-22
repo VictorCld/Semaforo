@@ -1,6 +1,6 @@
-# 🚦 Trabalho Sekeff - Simulador de Tráfego Urbano
+# 🚦 Simulador de Tráfego Urbano
 
-Bem-vindo ao **Trabalho Sekeff**, um simulador de tráfego urbano desenvolvido em Java, com interface gráfica e integração de dados reais de mapas. O projeto permite simular o fluxo de veículos em uma malha urbana, controlando semáforos com diferentes modelos de operação e visualizando o resultado em tempo real.
+Bem-vindo ao **Simulador de Tráfego Urbano**, um simulador de tráfego urbano desenvolvido em Java, com interface gráfica e integração de dados reais de mapas. O projeto permite simular o fluxo de veículos em uma malha urbana, controlando semáforos com diferentes modelos de operação e visualizando o resultado em tempo real.
 
 ---
 
