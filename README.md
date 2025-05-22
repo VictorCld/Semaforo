@@ -66,7 +66,7 @@ cd trabalho-sekeff-main
 
 ### 4. Execute a aplicação
 
-* ./mvnw clean package
+* ./mvnw spring-boot:run
 
 ### 5. Use a interface gráfica
 
