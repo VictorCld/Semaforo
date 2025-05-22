@@ -16,6 +16,7 @@ public class SimulacaoGUI extends JFrame {
     private VisualizacaoSimulador painelVisual;
     private Simulacao simulacao;
     private Thread threadSimulacao;
+
     public SimulacaoGUI(Grafo grafo, GeradorVeiculos geradorVeiculos) {
 
         setTitle("Controle da Simulação");
@@ -31,7 +32,8 @@ public class SimulacaoGUI extends JFrame {
         painelControle.add(txtNumCarros);
 
         painelControle.add(new JLabel("Modelo:"));
-        comboModelo = new JComboBox<>(new String[]{"1 - Ciclo fixo", "2 - Otimização espera", "3 - Otimização energia"});
+        comboModelo = new JComboBox<>(
+                new String[] { "1 - Ciclo fixo", "2 - Otimização espera", "3 - Otimização energia" });
         painelControle.add(comboModelo);
 
         btnIniciar = new JButton("Iniciar");
@@ -105,13 +107,8 @@ public class SimulacaoGUI extends JFrame {
         // Botão salvar
         btnSalvar.addActionListener(e -> {
             if (simulacao != null) {
-                JFileChooser chooser = new JFileChooser();
-                chooser.setCurrentDirectory(new File("saves"));
-                int result = chooser.showSaveDialog(this);
-                if (result == JFileChooser.APPROVE_OPTION) {
-                    String nomeArquivo = chooser.getSelectedFile().getName();
-                    simulacao.salvar(nomeArquivo);
-                }
+                simulacao.salvarEstatisticas();
+                JOptionPane.showMessageDialog(this, "Arquivo salvo");
             }
         });
 

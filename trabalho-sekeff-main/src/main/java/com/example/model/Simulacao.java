@@ -2,10 +2,9 @@ package com.example.model;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.Scanner;
 
@@ -32,6 +31,7 @@ public class Simulacao implements Serializable {
     private ControladorSemaforos controladorSemaforos;
     private transient boolean rodando;
     private transient boolean pausado;
+    private String ultimaEstatistica;
 
     public Simulacao(Grafo grafo, GeradorVeiculos geradorVeiculos) {
         this.grafo = grafo;
@@ -93,201 +93,193 @@ public class Simulacao implements Serializable {
     }
 
     public void testarVeiculosESemaforosComModelo(int quantidadeDeVeiculos, int modelo, VisualizacaoSimulador painel) {
-    System.out.println("===============================================");
-    System.out.println(" INÍCIO DA SIMULAÇÃO DE VEÍCULOS E SEMÁFOROS ");
-    System.out.println("===============================================");
+        System.out.println("===============================================");
+        System.out.println(" INÍCIO DA SIMULAÇÃO DE VEÍCULOS E SEMÁFOROS ");
+        System.out.println("===============================================");
 
-    rodando = true;
+        rodando = true;
 
-    geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
+        geradorVeiculos.gerarMultiplosVeiculos(quantidadeDeVeiculos, filaVeiculos);
 
-    
-    System.out.println("\n========== ROTAS DOS VEÍCULOS ==========");
-    for (int i = 0; i < filaVeiculos.size(); i++) {
-        Veiculo v = filaVeiculos.get(i);
-        System.out.println();
-        System.out.printf(" [Veículo %d] = ", v.getNumeroSimulacao());
-        LinkedList<Long> rota = v.getCaminho();
-        Node<Long> atual = rota.head;
-        while (atual != null) {
-            System.out.print(atual.data);
-            if (atual.next != null) {
-                System.out.print("  ->  ");
+        System.out.println("\n========== ROTAS DOS VEÍCULOS ==========");
+        for (int i = 0; i < filaVeiculos.size(); i++) {
+            Veiculo v = filaVeiculos.get(i);
+            System.out.println();
+            System.out.printf(" [Veículo %d] = ", v.getNumeroSimulacao());
+            LinkedList<Long> rota = v.getCaminho();
+            Node<Long> atual = rota.head;
+            while (atual != null) {
+                System.out.print(atual.data);
+                if (atual.next != null) {
+                    System.out.print("  ->  ");
+                }
+                atual = atual.next;
             }
-            atual = atual.next;
+            System.out.println();
         }
-        System.out.println();
-    }
-    System.out.println("========================================\n");
+        System.out.println("========================================\n");
 
-    
-    HashSet<Long> veiculosQueChegaram = new HashSet<>();
-    HashMap<Long, Integer> tempoViagem = new HashMap<>();
-    HashMap<Long, Integer> tempoEspera = new HashMap<>();
-    int totalVeiculosCongestionados = 0;
-    int ciclo = 0;
+        HashSet<Long> veiculosQueChegaram = new HashSet<>();
+        HashMap<Long, Integer> tempoViagem = new HashMap<>();
+        HashMap<Long, Integer> tempoEspera = new HashMap<>();
+        int totalVeiculosCongestionados = 0;
+        int ciclo = 0;
 
-    
-    long inicioSimulacao = System.currentTimeMillis();
+        long inicioSimulacao = System.currentTimeMillis();
 
-    
-    while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos && rodando) {
-        
-        synchronized (this) {
-            while (pausado) {
-                try {
-                    wait();
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
+        while (veiculosQueChegaram.tamanho() < quantidadeDeVeiculos && rodando) {
+
+            synchronized (this) {
+                while (pausado) {
+                    try {
+                        wait();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
             }
-        }
-        // ----------------------------------------
+            // ----------------------------------------
 
-        System.out.println("\n-----------------------------------------------");
-        System.out.printf("CICLO %d\n", ciclo);
-        System.out.println("-----------------------------------------------");
+            System.out.println("\n-----------------------------------------------");
+            System.out.printf("CICLO %d\n", ciclo);
+            System.out.println("-----------------------------------------------");
 
-        int tamanho = filaVeiculos.size();
-        for (int i = 0; i < tamanho; i++) {
-            Veiculo v = filaVeiculos.desenfileirar();
-            int numeroVeiculo = v.getNumeroSimulacao();
+            int tamanho = filaVeiculos.size();
+            for (int i = 0; i < tamanho; i++) {
+                Veiculo v = filaVeiculos.desenfileirar();
+                int numeroVeiculo = v.getNumeroSimulacao();
 
-            
-            Integer viagemAtual = tempoViagem.get(v.getId());
-            if (viagemAtual == null)
-                viagemAtual = 0;
-            tempoViagem.put(v.getId(), viagemAtual + 1);
+                Integer viagemAtual = tempoViagem.get(v.getId());
+                if (viagemAtual == null)
+                    viagemAtual = 0;
+                tempoViagem.put(v.getId(), viagemAtual + 1);
 
-            if (v.chegouAoDestino()) {
-                if (!veiculosQueChegaram.contem(v.getId())) {
-                    veiculosQueChegaram.adicionar(v.getId());
-                    System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
+                if (v.chegouAoDestino()) {
+                    if (!veiculosQueChegaram.contem(v.getId())) {
+                        veiculosQueChegaram.adicionar(v.getId());
+                        System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
+                    }
+                    continue;
                 }
-                continue;
-            }
 
-            Intersecao proxima = v.getProximaIntersecao(grafo);
-            Intersecao atualInter = v.getIntersecaoAtual(grafo);
+                Intersecao proxima = v.getProximaIntersecao(grafo);
+                Intersecao atualInter = v.getIntersecaoAtual(grafo);
 
-            if (proxima == null) {
-                if (v.estaNoDestino() && !veiculosQueChegaram.contem(v.getId())) {
-                    v.marcarChegou();
-                    veiculosQueChegaram.adicionar(v.getId());
-                    System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
+                if (proxima == null) {
+                    if (v.estaNoDestino() && !veiculosQueChegaram.contem(v.getId())) {
+                        v.marcarChegou();
+                        veiculosQueChegaram.adicionar(v.getId());
+                        System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
+                    } else {
+                        filaVeiculos.enfileirar(v);
+                    }
+                    continue;
+                }
+
+                Semaforo semaforo = proxima.getSemaforo();
+                if (semaforo == null) {
+                    v.avancar();
+                    System.out.printf("[Veículo %d]  Avançou: %s -> %s (sem semáforo)\n", numeroVeiculo,
+                            atualInter.getId(), proxima.getId());
                 } else {
+                    semaforo.atualizarCicloModelo(modelo, filaVeiculos);
+
+                    TrafficLightState estado = semaforo.getEstadoAtual();
+                    switch (estado) {
+                        case VERDE:
+                            v.avancar();
+                            System.out.printf("[Veículo %d]  Passou no sinal VERDE: %s -> %s\n", numeroVeiculo,
+                                    atualInter.getId(), proxima.getId());
+                            break;
+                        case AMARELO:
+                            Integer esperaAmarelo = tempoEspera.get(v.getId());
+                            if (esperaAmarelo == null)
+                                esperaAmarelo = 0;
+                            tempoEspera.put(v.getId(), esperaAmarelo + 1);
+                            System.out.printf("[Veículo %d]  Aguardando sinal AMARELO em %s (próximo: %s)\n",
+                                    numeroVeiculo, atualInter.getId(), proxima.getId());
+                            break;
+                        case VERMELHO:
+                            Integer esperaVermelho = tempoEspera.get(v.getId());
+                            if (esperaVermelho == null)
+                                esperaVermelho = 0;
+                            tempoEspera.put(v.getId(), esperaVermelho + 1);
+                            System.out.printf("[Veículo %d]  Aguardando sinal VERMELHO em %s (próximo: %s)\n",
+                                    numeroVeiculo, atualInter.getId(), proxima.getId());
+                            break;
+                    }
+                }
+
+                if (!v.chegouAoDestino()) {
                     filaVeiculos.enfileirar(v);
-                }
-                continue;
-            }
-
-            Semaforo semaforo = proxima.getSemaforo();
-            if (semaforo == null) {
-                v.avancar();
-                System.out.printf("[Veículo %d]  Avançou: %s -> %s (sem semáforo)\n", numeroVeiculo,
-                        atualInter.getId(), proxima.getId());
-            } else {
-                semaforo.atualizarCicloModelo(modelo, filaVeiculos);
-
-                TrafficLightState estado = semaforo.getEstadoAtual();
-                switch (estado) {
-                    case VERDE:
-                        v.avancar();
-                        System.out.printf("[Veículo %d]  Passou no sinal VERDE: %s -> %s\n", numeroVeiculo,
-                                atualInter.getId(), proxima.getId());
-                        break;
-                    case AMARELO:
-                        Integer esperaAmarelo = tempoEspera.get(v.getId());
-                        if (esperaAmarelo == null)
-                            esperaAmarelo = 0;
-                        tempoEspera.put(v.getId(), esperaAmarelo + 1);
-                        System.out.printf("[Veículo %d]  Aguardando sinal AMARELO em %s (próximo: %s)\n",
-                                numeroVeiculo, atualInter.getId(), proxima.getId());
-                        break;
-                    case VERMELHO:
-                        Integer esperaVermelho = tempoEspera.get(v.getId());
-                        if (esperaVermelho == null)
-                            esperaVermelho = 0;
-                        tempoEspera.put(v.getId(), esperaVermelho + 1);
-                        System.out.printf("[Veículo %d]  Aguardando sinal VERMELHO em %s (próximo: %s)\n",
-                                numeroVeiculo, atualInter.getId(), proxima.getId());
-                        break;
+                } else if (!veiculosQueChegaram.contem(v.getId())) {
+                    veiculosQueChegaram.adicionar(v.getId());
+                    System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
                 }
             }
 
-            if (!v.chegouAoDestino()) {
-                filaVeiculos.enfileirar(v);
-            } else if (!veiculosQueChegaram.contem(v.getId())) {
-                veiculosQueChegaram.adicionar(v.getId());
-                System.out.printf("[Veículo %d]  Chegou ao destino final: %s\n", numeroVeiculo, v.getDestino());
+            totalVeiculosCongestionados += filaVeiculos.size();
+
+            if (painel != null) {
+
+                LinkedList<Veiculo> veiculosAtivos = new LinkedList<>();
+                for (int i = 0; i < filaVeiculos.size(); i++) {
+                    veiculosAtivos.add(filaVeiculos.get(i));
+                }
+                painel.setVeiculos(veiculosAtivos);
+                painel.repaint();
+            }
+
+            controladorSemaforos.atualizarSemaforos();
+            ciclo++;
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
 
-        
-        totalVeiculosCongestionados += filaVeiculos.size();
+        long fimSimulacao = System.currentTimeMillis();
+        double duracaoSegundos = (fimSimulacao - inicioSimulacao) / 1000.0;
 
-        
-        if (painel != null) {
-           
-            LinkedList<Veiculo> veiculosAtivos = new LinkedList<>();
-            for (int i = 0; i < filaVeiculos.size(); i++) {
-                veiculosAtivos.add(filaVeiculos.get(i));
+        System.out.println("\n===============================================");
+        System.out.println("    TODOS OS VEÍCULOS CHEGARAM AO DESTINO!     ");
+        System.out.println("===============================================");
+
+        double somaViagem = 0;
+        double somaEspera = 0;
+        Iterable<Long> chaves = tempoViagem.keySet();
+        for (Long id : chaves) {
+            somaViagem += tempoViagem.get(id);
+            Integer espera = tempoEspera.get(id);
+            if (espera != null) {
+                somaEspera += espera;
             }
-            painel.setVeiculos(veiculosAtivos);
-            painel.repaint();
         }
+        double tempoMedioViagem = somaViagem / quantidadeDeVeiculos;
+        double tempoMedioEspera = somaEspera / quantidadeDeVeiculos;
+        double indiceCongestionamento = (double) totalVeiculosCongestionados / ciclo;
 
-        controladorSemaforos.atualizarSemaforos();
-        ciclo++;
+        String estatisticas = String.format(
+                "=============== ESTATÍSTICAS DA SIMULAÇÃO ===============\n" +
+                        "Tempo médio de viagem: %.2f ciclos\n" +
+                        "Tempo médio de espera em semáforo: %.2f ciclos\n" +
+                        "Índice médio de congestionamento: %.2f veículos/ciclo\n" +
+                        "Quantidade de ciclos: %d\n" +
+                        "Tempo total de simulação: %.2f segundos\n" +
+                        "=========================================================",
+                tempoMedioViagem, tempoMedioEspera, indiceCongestionamento, ciclo, duracaoSegundos);
 
-        try {
-            Thread.sleep(500);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
+        ultimaEstatistica = estatisticas;
+
+        System.out.println(estatisticas);
+
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            JOptionPane.showMessageDialog(null, estatisticas, "Estatísticas da Simulação",
+                    JOptionPane.INFORMATION_MESSAGE);
+        });
     }
-
-    
-    long fimSimulacao = System.currentTimeMillis();
-    double duracaoSegundos = (fimSimulacao - inicioSimulacao) / 1000.0;
-
-    System.out.println("\n===============================================");
-    System.out.println("    TODOS OS VEÍCULOS CHEGARAM AO DESTINO!     ");
-    System.out.println("===============================================");
-
-    
-    double somaViagem = 0;
-    double somaEspera = 0;
-    Iterable<Long> chaves = tempoViagem.keySet();
-    for (Long id : chaves) {
-        somaViagem += tempoViagem.get(id);
-        Integer espera = tempoEspera.get(id);
-        if (espera != null) {
-            somaEspera += espera;
-        }
-    }
-    double tempoMedioViagem = somaViagem / quantidadeDeVeiculos;
-    double tempoMedioEspera = somaEspera / quantidadeDeVeiculos;
-    double indiceCongestionamento = (double) totalVeiculosCongestionados / ciclo;
-
-    String estatisticas = String.format(
-            "=============== ESTATÍSTICAS DA SIMULAÇÃO ===============\n" +
-                    "Tempo médio de viagem: %.2f ciclos\n" +
-                    "Tempo médio de espera em semáforo: %.2f ciclos\n" +
-                    "Índice médio de congestionamento: %.2f veículos/ciclo\n" +
-                    "Quantidade de ciclos: %d\n" +
-                    "Tempo total de simulação: %.2f segundos\n" +
-                    "=========================================================",
-            tempoMedioViagem, tempoMedioEspera, indiceCongestionamento, ciclo, duracaoSegundos);
-
-    System.out.println(estatisticas);
-
-    
-    javax.swing.SwingUtilities.invokeLater(() -> {
-        JOptionPane.showMessageDialog(null, estatisticas, "Estatísticas da Simulação",
-                JOptionPane.INFORMATION_MESSAGE);
-    });
-}
 
     private void simularMovimentoVeiculos() {
         int tamanho = filaVeiculos.size();
@@ -363,20 +355,20 @@ public class Simulacao implements Serializable {
         return pausado;
     }
 
-    public void salvar(String nomeArquivo) {
-        File dir = new File("saves");
-        if (!dir.exists())
-            dir.mkdirs();
-
-        if (!nomeArquivo.endsWith(".dat")) {
-            nomeArquivo += ".dat";
-        }
-
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("saves/" + nomeArquivo))) {
-            out.writeObject(this);
-            System.out.println("Simulação salva em saves/" + nomeArquivo);
-        } catch (IOException e) {
-            System.out.println("Erro ao salvar simulação: " + e.getMessage());
+    public void salvarEstatisticas() {
+        String diretorio = "saves";
+        String nomeArquivo = "estatisticas-da-simulacao.txt";
+        try {
+            File dir = new File(diretorio);
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+            File file = new File(dir, nomeArquivo);
+            FileWriter writer = new FileWriter(file);
+            writer.write(ultimaEstatistica); 
+            writer.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
